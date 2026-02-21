@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Yapaa</title>
+  <meta charset="UTF-8" />
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #1f1f1f;
+      color: white;
+    }
+
+    header {
+      padding: 15px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      background: #2a2a2a;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 80px;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      resize: none;
+      font-size: 14px;
+      background: #333;
+      color: white;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 6px;
+      background: #444;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #555;
+    }
+
+    .yap {
+      background: #2a2a2a;
+      padding: 12px;
+      margin-top: 15px;
+      border-radius: 6px;
+    }
+
+    .username {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .auth-buttons {
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>Yapaa</header>
+
+  <div class="container">
+
+    <div class="auth-buttons">
+      <button id="loginBtn">Login with Google</button>
+      <button id="logoutBtn">Logout</button>
+    </div>
+
+    <textarea id="yapInput" placeholder="What do you want to yap?"></textarea>
+    <button id="postBtn">Yap</button>
+
+    <div id="feed"></div>
+
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+      getAuth, 
+      GoogleAuthProvider, 
+      signInWithPopup, 
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc, 
+      serverTimestamp,
+      onSnapshot,
+      query,
+      orderBy
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCAjWjAurT-TTbbo8P70Uo9IA5S6U1EAaM",
+      authDomain: "yapaa-5f2b8.firebaseapp.com",
+      projectId: "yapaa-5f2b8",
+      storageBucket: "yapaa-5f2b8.firebasestorage.app",
+      messagingSenderId: "508880150784",
+      appId: "1:508880150784:web:42353862a32d9010ac13e5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const provider = new GoogleAuthProvider();
+
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const postBtn = document.getElementById("postBtn");
+    const yapInput = document.getElementById("yapInput");
+    const feed = document.getElementById("feed");
+
+    loginBtn.onclick = async () => {
+      await signInWithPopup(auth, provider);
+    };
+
+    logoutBtn.onclick = async () => {
+      await signOut(auth);
+    };
+
+    postBtn.onclick = async () => {
+      if (!auth.currentUser) {
+        alert("You must be logged in to yap.");
+        return;
+      }
+
+      const text = yapInput.value.trim();
+      if (!text) return;
+
+      await addDoc(collection(db, "yaps"), {
+        uid: auth.currentUser.uid,
+        username: auth.currentUser.email.split("@")[0],
+        content: text,
+        createdAt: serverTimestamp()
+      });
+
+      yapInput.value = "";
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("Logged in as:", user.email);
+      } else {
+        console.log("Logged out");
+      }
+    });
+
+    const q = query(collection(db, "yaps"), orderBy("createdAt", "desc"));
+
+    onSnapshot(q, (snapshot) => {
+      feed.innerHTML = "";
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+
+        const yapDiv = document.createElement("div");
+        yapDiv.className = "yap";
+
+        yapDiv.innerHTML = `
+          <div class="username">${data.username}</div>
+          <div>${data.content}</div>
+        `;
+
+        feed.appendChild(yapDiv);
+      });
+    });
+
+    console.log("Firebase connected ✅");
+  </script>
+
+</body>
+</html>
