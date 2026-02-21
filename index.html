@@ -6,18 +6,15 @@
 
   <style>
     :root {
-      --bg: #0e0e0e;
-      --panel: #1a1a1a;
-      --soft: #2a2a2a;
-      --text: #ffffff;
-      --muted: #9a9a9a;
+      --bg: #f2f2f2;
+      --card: #ffffff;
+      --text: #111;
+      --muted: #777;
       --radius: 25px;
       --gradient: linear-gradient(to right, #ff914d, #ff6100);
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -29,54 +26,126 @@
     /* NAVBAR */
 
     .navbar {
+      background: white;
       height: 70px;
-      background: #111;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 30px;
-      border-bottom: 1px solid #222;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 22px;
-      font-weight: bold;
+      padding: 0 40px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
     .logo img {
-      height: 40px;
+      height: 42px;
     }
 
     .nav-right {
       display: flex;
-      gap: 10px;
+      align-items: center;
+      gap: 15px;
+      position: relative;
+    }
+
+    button {
+      border: none;
+      border-radius: var(--radius);
+      padding: 8px 14px;
+      cursor: pointer;
+      background: #e5e5e5;
+      transition: all 0.25s ease;
+    }
+
+    button:hover {
+      background: var(--gradient);
+      color: white;
+    }
+
+    /* PLUS BUTTON */
+
+    .plus-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s ease;
+    }
+
+    .plus-btn.open {
+      transform: rotate(45deg);
+    }
+
+    /* DROPDOWN PANEL */
+
+    .create-panel {
+      position: absolute;
+      top: 60px;
+      right: 0;
+      width: 320px;
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      padding: 20px;
+      display: none;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .create-panel.open {
+      display: flex;
+      animation: slideDown 0.25s ease forwards;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 12px;
+      right: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    textarea {
+      width: 100%;
+      border-radius: var(--radius);
+      border: none;
+      padding: 12px;
+      background: #f0f0f0;
+      resize: none;
+      height: 80px;
+      font-family: inherit;
     }
 
     /* LAYOUT */
 
-    .layout {
+    .main-container {
+      max-width: 1200px;
+      margin: 40px auto;
       display: flex;
-      padding: 20px;
-      gap: 20px;
-      max-width: 1400px;
-      margin: auto;
+      gap: 25px;
     }
 
     .sidebar {
       width: 220px;
-      background: var(--panel);
+      background: white;
       border-radius: var(--radius);
       padding: 20px;
       height: fit-content;
     }
 
-    .sidebar h3 {
-      margin-top: 0;
-      font-size: 16px;
-      color: var(--muted);
+    .sidebar div {
+      padding: 10px 0;
+      cursor: pointer;
     }
 
     .feed {
@@ -84,38 +153,16 @@
       max-width: 650px;
     }
 
-    .rightbar {
-      width: 250px;
-      background: var(--panel);
+    .card {
+      background: white;
       border-radius: var(--radius);
       padding: 20px;
-      height: fit-content;
-    }
-
-    /* CARDS */
-
-    .card {
-      background: var(--panel);
-      border-radius: var(--radius);
-      padding: 18px;
       margin-bottom: 20px;
-    }
-
-    textarea {
-      width: 100%;
-      height: 80px;
-      border: none;
-      resize: none;
-      border-radius: var(--radius);
-      padding: 12px;
-      background: var(--soft);
-      color: white;
-      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
 
     .username {
       font-weight: bold;
-      margin-bottom: 6px;
     }
 
     .timestamp {
@@ -124,37 +171,17 @@
       margin-bottom: 8px;
     }
 
-    /* BUTTONS */
-
-    button {
-      padding: 10px 14px;
-      border: none;
+    .rightbar {
+      width: 250px;
+      background: white;
       border-radius: var(--radius);
-      background: #3a3a3a;
-      color: white;
-      cursor: pointer;
-      transition: all 0.25s ease;
+      padding: 20px;
+      height: fit-content;
     }
-
-    button:hover {
-      background: var(--gradient);
-    }
-
-    .full-btn {
-      width: 100%;
-      margin-top: 10px;
-    }
-
-    /* RESPONSIVE */
 
     @media (max-width: 1000px) {
-      .sidebar, .rightbar {
-        display: none;
-      }
-
-      .layout {
-        justify-content: center;
-      }
+      .sidebar, .rightbar { display: none; }
+      .main-container { justify-content: center; }
     }
 
   </style>
@@ -165,69 +192,54 @@
   <!-- NAVBAR -->
   <div class="navbar">
     <div class="logo">
-      <img src="YAPAA BETA V1 (3).png" />
-      Yapaa
+      <img src="logo-full.png" alt="Yapaa">
     </div>
 
     <div class="nav-right">
+      <button id="plusBtn" class="plus-btn">+</button>
       <button id="loginBtn">Login</button>
       <button id="logoutBtn">Logout</button>
-    </div>
-  </div>
 
-  <!-- MAIN LAYOUT -->
-  <div class="layout">
+      <!-- SLIDE PANEL -->
+      <div id="createPanel" class="create-panel">
+        <div class="close-btn" id="closePanel">✕</div>
 
-    <!-- LEFT SIDEBAR -->
-    <div class="sidebar">
-      <h3>Navigation</h3>
-      <p>Home</p>
-      <p>Profile</p>
-      <p>My Yaps</p>
-    </div>
+        <button id="createYap">Create a Yap</button>
+        <button disabled>Create a Cut (Coming Soon)</button>
 
-    <!-- CENTER FEED -->
-    <div class="feed">
-
-      <!-- Post Composer -->
-      <div class="card">
-        <textarea id="yapInput" placeholder="What do you want to yap?"></textarea>
-        <button id="postBtn" class="full-btn">Yap</button>
+        <div id="yapComposer" style="display:none;">
+          <textarea id="yapInput" placeholder="What do you want to yap?"></textarea>
+          <button id="postBtn">Post Yap</button>
+        </div>
       </div>
+    </div>
+  </div>
 
-      <!-- Feed -->
-      <div id="feed"></div>
+  <!-- MAIN -->
+  <div class="main-container">
 
+    <div class="sidebar">
+      <div>Feed</div>
+      <div>Profile</div>
+      <div>Saved</div>
     </div>
 
-    <!-- RIGHT SIDEBAR -->
+    <div class="feed">
+      <div id="feed"></div>
+    </div>
+
     <div class="rightbar">
-      <h3>Yapaa Beta</h3>
-      <p>Early access build.</p>
-      <p>More features coming soon.</p>
+      <h4>Yapaa Beta</h4>
+      <p>Building something different.</p>
     </div>
 
   </div>
 
+  <!-- FIREBASE -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { 
-      getAuth, 
-      GoogleAuthProvider, 
-      signInWithPopup, 
-      signOut,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-    import { 
-      getFirestore, 
-      collection, 
-      addDoc, 
-      serverTimestamp,
-      onSnapshot,
-      query,
-      orderBy
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCAjWjAurT-TTbbo8P70Uo9IA5S6U1EAaM",
@@ -241,29 +253,36 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-
     const provider = new GoogleAuthProvider();
 
-    const loginBtn = document.getElementById("loginBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
+    const plusBtn = document.getElementById("plusBtn");
+    const createPanel = document.getElementById("createPanel");
+    const closePanel = document.getElementById("closePanel");
+    const createYap = document.getElementById("createYap");
+    const yapComposer = document.getElementById("yapComposer");
     const postBtn = document.getElementById("postBtn");
     const yapInput = document.getElementById("yapInput");
     const feed = document.getElementById("feed");
 
-    loginBtn.onclick = async () => {
-      await signInWithPopup(auth, provider);
+    plusBtn.onclick = () => {
+      createPanel.classList.toggle("open");
+      plusBtn.classList.toggle("open");
     };
 
-    logoutBtn.onclick = async () => {
-      await signOut(auth);
+    closePanel.onclick = () => {
+      createPanel.classList.remove("open");
+      plusBtn.classList.remove("open");
     };
+
+    createYap.onclick = () => {
+      yapComposer.style.display = "block";
+    };
+
+    document.getElementById("loginBtn").onclick = () => signInWithPopup(auth, provider);
+    document.getElementById("logoutBtn").onclick = () => signOut(auth);
 
     postBtn.onclick = async () => {
-      if (!auth.currentUser) {
-        alert("Login first.");
-        return;
-      }
-
+      if (!auth.currentUser) return alert("Login first.");
       const text = yapInput.value.trim();
       if (!text) return;
 
@@ -283,17 +302,14 @@
       feed.innerHTML = "";
       snapshot.forEach((doc) => {
         const data = doc.data();
-
-        const yap = document.createElement("div");
-        yap.className = "card";
-
-        yap.innerHTML = `
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
           <div class="username">${data.username}</div>
           <div class="timestamp">${data.createdAt?.toDate().toLocaleString() || ""}</div>
           <div>${data.content}</div>
         `;
-
-        feed.appendChild(yap);
+        feed.appendChild(card);
       });
     });
   </script>
