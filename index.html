@@ -6,55 +6,69 @@
 
   <style>
     :root {
-      --bg: #f2f2f2;
-      --card: #ffffff;
-      --text: #111;
-      --muted: #777;
-      --radius: 25px;
+      --page-bg: #0f0f0f;
+      --container-bg: #1e1e1e;
+      --card-bg: #242424;
+      --text: #ffffff;
+      --muted: #a0a0a0;
+      --radius-main: 14px;
+      --radius: 12px;
       --gradient: linear-gradient(to right, #ff914d, #ff6100);
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
+      background: var(--page-bg);
       font-family: Arial, sans-serif;
-      background: var(--bg);
       color: var(--text);
+    }
+
+    /* APP CONTAINER */
+
+    .app {
+      max-width: 1250px;
+      margin: 40px auto;
+      background: var(--container-bg);
+      border-radius: var(--radius-main);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+      overflow: hidden;
     }
 
     /* NAVBAR */
 
     .navbar {
-      background: white;
       height: 70px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 40px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      padding: 0 30px;
+      background: var(--container-bg);
+      border-bottom: 1px solid #2c2c2c;
+      position: relative;
     }
 
     .logo img {
-      height: 42px;
+      height: 38px;
     }
 
     .nav-right {
       display: flex;
       align-items: center;
-      gap: 15px;
+      gap: 12px;
       position: relative;
     }
 
     button {
       border: none;
-      border-radius: var(--radius);
+      background: #2e2e2e;
+      color: var(--text);
       padding: 8px 14px;
+      border-radius: var(--radius);
       cursor: pointer;
-      background: #e5e5e5;
       transition: all 0.25s ease;
     }
 
@@ -63,53 +77,52 @@
       color: white;
     }
 
-    /* PLUS BUTTON */
-
     .plus-btn {
-      width: 42px;
-      height: 42px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       font-size: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.3s ease;
+      padding: 0;
+      transition: transform 0.3s ease, background 0.25s ease;
     }
 
     .plus-btn.open {
       transform: rotate(45deg);
     }
 
-    /* DROPDOWN PANEL */
+    /* CREATE PANEL */
 
     .create-panel {
       position: absolute;
-      top: 60px;
+      top: 70px;
       right: 0;
       width: 320px;
-      background: white;
+      background: var(--card-bg);
       border-radius: var(--radius);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
       padding: 20px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.7);
       display: none;
       flex-direction: column;
       gap: 15px;
+      animation: slideDown 0.25s ease forwards;
     }
 
     .create-panel.open {
       display: flex;
-      animation: slideDown 0.25s ease forwards;
     }
 
     @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-10px); }
+      from { opacity: 0; transform: translateY(-8px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
     .close-btn {
       position: absolute;
-      top: 12px;
-      right: 15px;
+      top: 10px;
+      right: 14px;
       font-weight: bold;
       cursor: pointer;
       color: var(--muted);
@@ -117,35 +130,44 @@
 
     textarea {
       width: 100%;
-      border-radius: var(--radius);
-      border: none;
-      padding: 12px;
-      background: #f0f0f0;
+      height: 90px;
       resize: none;
-      height: 80px;
+      border: none;
+      border-radius: var(--radius);
+      background: #2e2e2e;
+      color: white;
+      padding: 10px;
       font-family: inherit;
+    }
+
+    textarea:focus {
+      outline: none;
     }
 
     /* LAYOUT */
 
-    .main-container {
-      max-width: 1200px;
-      margin: 40px auto;
+    .content {
       display: flex;
       gap: 25px;
+      padding: 30px;
     }
 
     .sidebar {
       width: 220px;
-      background: white;
-      border-radius: var(--radius);
-      padding: 20px;
-      height: fit-content;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      font-size: 15px;
     }
 
     .sidebar div {
-      padding: 10px 0;
       cursor: pointer;
+      color: var(--muted);
+      transition: color 0.2s ease;
+    }
+
+    .sidebar div:hover {
+      color: white;
     }
 
     .feed {
@@ -154,15 +176,16 @@
     }
 
     .card {
-      background: white;
+      background: var(--card-bg);
       border-radius: var(--radius);
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      padding: 18px;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
     }
 
     .username {
       font-weight: bold;
+      margin-bottom: 4px;
     }
 
     .timestamp {
@@ -173,15 +196,19 @@
 
     .rightbar {
       width: 250px;
-      background: white;
-      border-radius: var(--radius);
-      padding: 20px;
-      height: fit-content;
+      font-size: 14px;
+      color: var(--muted);
     }
 
     @media (max-width: 1000px) {
-      .sidebar, .rightbar { display: none; }
-      .main-container { justify-content: center; }
+      .sidebar,
+      .rightbar {
+        display: none;
+      }
+
+      .feed {
+        max-width: 100%;
+      }
     }
 
   </style>
@@ -189,48 +216,52 @@
 
 <body>
 
-  <!-- NAVBAR -->
-  <div class="navbar">
-    <div class="logo">
-      <img src="logo-collapsed.png" alt="Yapaa">
-    </div>
+  <div class="app">
 
-    <div class="nav-right">
-      <button id="plusBtn" class="plus-btn">+</button>
-      <button id="loginBtn">Login</button>
-      <button id="logoutBtn">Logout</button>
+    <!-- NAVBAR -->
+    <div class="navbar">
+      <div class="logo">
+        <img src="logo-full.png" alt="Yapaa">
+      </div>
 
-      <!-- SLIDE PANEL -->
-      <div id="createPanel" class="create-panel">
-        <div class="close-btn" id="closePanel">✕</div>
+      <div class="nav-right">
+        <button id="plusBtn" class="plus-btn">+</button>
+        <button id="loginBtn">Login</button>
+        <button id="logoutBtn">Logout</button>
 
-        <button id="createYap">Create a Yap</button>
-        <button disabled>Create a Cut (Coming Soon)</button>
+        <div id="createPanel" class="create-panel">
+          <div class="close-btn" id="closePanel">✕</div>
 
-        <div id="yapComposer" style="display:none;">
-          <textarea id="yapInput" placeholder="What do you want to yap?"></textarea>
-          <button id="postBtn">Post Yap</button>
+          <button id="createYap">Create a Yap</button>
+          <button disabled>Create a Cut (Coming Soon)</button>
+
+          <div id="composer" style="display:none;">
+            <textarea id="yapInput" placeholder="What do you want to yap?"></textarea>
+            <button id="postBtn">Post Yap</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- MAIN -->
-  <div class="main-container">
+    <!-- MAIN CONTENT -->
+    <div class="content">
 
-    <div class="sidebar">
-      <div>Feed</div>
-      <div>Profile</div>
-      <div>Saved</div>
-    </div>
+      <div class="sidebar">
+        <div>Feed</div>
+        <div>Profile</div>
+        <div>Saved</div>
+        <div>Settings</div>
+      </div>
 
-    <div class="feed">
-      <div id="feed"></div>
-    </div>
+      <div class="feed">
+        <div id="feed"></div>
+      </div>
 
-    <div class="rightbar">
-      <h4>Yapaa Beta</h4>
-      <p>Building something different.</p>
+      <div class="rightbar">
+        <div>Trending</div>
+        <div>Suggested Users</div>
+      </div>
+
     </div>
 
   </div>
@@ -259,7 +290,7 @@
     const createPanel = document.getElementById("createPanel");
     const closePanel = document.getElementById("closePanel");
     const createYap = document.getElementById("createYap");
-    const yapComposer = document.getElementById("yapComposer");
+    const composer = document.getElementById("composer");
     const postBtn = document.getElementById("postBtn");
     const yapInput = document.getElementById("yapInput");
     const feed = document.getElementById("feed");
@@ -275,7 +306,7 @@
     };
 
     createYap.onclick = () => {
-      yapComposer.style.display = "block";
+      composer.style.display = "block";
     };
 
     document.getElementById("loginBtn").onclick = () => signInWithPopup(auth, provider);
