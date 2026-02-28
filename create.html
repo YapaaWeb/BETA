@@ -1,97 +1,120 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Create • KAVNO</title>
-<style>
-body{background:#070707;color:white;font-family:Inter;margin:0}
-.container{max-width:700px;margin:50px auto;background:#151515;padding:20px;border-radius:14px}
-input,textarea{width:100%;margin-bottom:15px;padding:10px;border-radius:10px;border:none;background:#2a2a2a;color:white}
-button{width:100%;padding:12px;border:none;border-radius:10px;background:#2a2a2a;color:white;cursor:pointer}
-button:hover{background:linear-gradient(90deg,#dcdcdc,#8f8f8f);color:black}
-.tabs{display:flex;gap:10px;margin-bottom:20px}
-.tabs button{flex:1}
-.active{background:linear-gradient(90deg,#dcdcdc,#8f8f8f)!important;color:black}
-</style>
+  <title>Create • Kavno</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBnT085eVcbqRiWG_ohyDFc6mShIqRcFOM",
+      authDomain: "kavno-8e9ea.firebaseapp.com",
+      projectId: "kavno-8e9ea",
+      storageBucket: "kavno-8e9ea.firebasestorage.app",
+      messagingSenderId: "978146900809",
+      appId: "1:978146900809:web:15265ae75beca386353898"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const CLOUD_NAME = "dhsj2x1co";
+    const UPLOAD_PRESET = "kavnoUploads";
+
+    window.publish = async () => {
+      const title = document.getElementById("title").value;
+      const body = document.getElementById("body").value;
+      const file = document.getElementById("media").files[0];
+      let mediaUrl = "";
+
+      if (file) {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", UPLOAD_PRESET);
+
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await res.json();
+        mediaUrl = data.secure_url;
+      }
+
+      await addDoc(collection(db, "posts"), {
+        title,
+        body,
+        media: mediaUrl,
+        score: 0,
+        genre: document.getElementById("genre").value,
+        created: new Date()
+      });
+
+      window.location.href = "index.html";
+    };
+  </script>
+
+  <style>
+    body {
+      margin: 0;
+      background: #030303;
+      font-family: Arial;
+      color: white;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background: #111;
+      padding: 20px;
+      border-radius: 8px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      background: #0d0d0d;
+      border: 1px solid #222;
+      color: white;
+      border-radius: 6px;
+    }
+
+    button {
+      margin-top: 20px;
+      background: linear-gradient(to right, #ff914d, #ff6100);
+      border: none;
+      padding: 10px 20px;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
 </head>
+
 <body>
+  <div class="container">
+    <h2>Create Post</h2>
 
-<div class="container">
-<h2>Create</h2>
+    <input id="title" placeholder="Title">
 
-<div class="tabs">
-<button id="postTab" class="active">Post</button>
-<button id="klipTab">Klip</button>
-</div>
+    <select id="genre">
+      <option>Other</option>
+      <option>Technology</option>
+      <option>Gaming</option>
+      <option>Music</option>
+      <option>News</option>
+    </select>
 
-<textarea id="text" placeholder="Write something..."></textarea>
-<input type="file" id="file">
+    <textarea id="body" rows="4" placeholder="Text (optional)"></textarea>
 
-<button onclick="publish()">Publish</button>
-</div>
+    <input type="file" id="media">
 
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, addDoc, collection, serverTimestamp }
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-/* FIREBASE */
-const firebaseConfig = {
-  apiKey: "AIzaSyBnT085eVcbqRiWG_ohyDFc6mShIqRcFOM",
-  authDomain: "kavno-8e9ea.firebaseapp.com",
-  projectId: "kavno-8e9ea",
-  storageBucket: "kavno-8e9ea.firebasestorage.app",
-  messagingSenderId: "978146900809",
-  appId: "1:978146900809:web:15265ae75beca386353898"
-};
-
-const app=initializeApp(firebaseConfig);
-const auth=getAuth(app);
-const db=getFirestore(app);
-
-/* CLOUDINARY */
-const CLOUD_NAME="dhsj2x1co";
-const UPLOAD_PRESET="kavnoUploads";
-
-let type="post";
-document.getElementById("postTab").onclick=()=>type="post";
-document.getElementById("klipTab").onclick=()=>type="klip";
-
-window.publish=async()=>{
-  const user=auth.currentUser;
-  if(!user){ alert("Login first"); return; }
-
-  let mediaURL="";
-  const file=document.getElementById("file").files[0];
-
-  if(file){
-    const fd=new FormData();
-    fd.append("file",file);
-    fd.append("upload_preset",UPLOAD_PRESET);
-
-    const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`,{
-      method:"POST",
-      body:fd
-    });
-    const data=await res.json();
-    mediaURL=data.secure_url;
-  }
-
-  await addDoc(collection(db,"posts"),{
-    username:user.displayName || "user",
-    uid:user.uid,
-    type,
-    text:document.getElementById("text").value,
-    mediaURL,
-    score:0,
-    createdAt:serverTimestamp()
-  });
-
-  location.href="index.html";
-};
-
-</script>
+    <button onclick="publish()">Post</button>
+  </div>
 </body>
 </html>
