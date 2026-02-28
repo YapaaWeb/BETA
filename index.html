@@ -1,1078 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Yapaa</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KAVNO</title>
 
-  <style>
-    :root{
-      --page-bg: #070707;            /* near black page background */
-      --container-bg: #151515;       /* dark column background */
-      --card-bg: #1f1f1f;            /* card backgrounds */
-      --muted: #9b9b9b;
-      --text: #ffffff;
-      --accent-left: #ff914d;
-      --accent-right: #ff6100;
-      --gradient: linear-gradient(90deg, var(--accent-left), var(--accent-right));
-      --radius-outer: 14px;
-      --radius: 12px;
-      --shadow-strong: 0 6px 24px rgba(0,0,0,0.7);
-    }
+<style>
+:root{
+  --bg:#070707;
+  --card:#151515;
+  --text:#ffffff;
+  --muted:#9a9a9a;
+  --silver1:#dcdcdc;
+  --silver2:#8f8f8f;
+  --radius:14px;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui;background:var(--bg);color:var(--text);}
 
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      background: var(--page-bg);
-      color: var(--text);
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-    }
+/* NAVBAR */
+.navbar{
+  height:70px;
+  background:#111;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 20px;
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+.logo{font-weight:700;font-size:20px;}
 
-    /* NAVBAR - full width edge-to-edge */
-    .navbar {
-      height: 72px;
-      background: var(--container-bg);
-      border-bottom: 1px solid rgba(255,255,255,0.03);
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      padding: 0 20px;
-      position: sticky;
-      top: 0;
-      z-index: 50;
-    }
+.nav-right{display:flex;gap:12px;align-items:center;}
 
-    .logo {
-      display:flex;
-      align-items:center;
-      gap:12px;
-    }
+.btn{
+  background:#2a2a2a;
+  border:none;
+  padding:8px 14px;
+  border-radius:10px;
+  color:white;
+  cursor:pointer;
+  transition:.3s;
+}
+.btn:hover{
+  background:linear-gradient(90deg,var(--silver1),var(--silver2));
+  color:black;
+}
 
-    .logo img { height:36px; display:block; }
+.create-btn{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  font-size:22px;
+  padding:0;
+}
 
-    .search {
-      flex: 1;
-      display:flex;
-      justify-content:center;
-    }
-
-    .search input {
-      width: 55%;
-      max-width: 720px;
-      min-width: 260px;
-      background:#0f0f0f;
-      border: 1px solid rgba(255,255,255,0.03);
-      color:var(--text);
-      padding: 10px 14px;
-      border-radius: 10px;
-    }
-
-    .nav-actions {
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-
-    .circle-btn {
-      width:44px;
-      height:44px;
-      border-radius:50%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:#2b2b2b;
-      border:none;
-      color:var(--text);
-      cursor:pointer;
-      transition:transform .25s ease, background .2s ease;
-    }
-    .circle-btn:hover { background: var(--gradient); color:white; }
-
-    .plus-btn.open { transform: rotate(45deg); }
-
-    .signin-btn {
-      background:#2b2b2b;
-      color:var(--text);
-      padding:8px 12px;
-      border-radius:12px;
-      border:none;
-      cursor:pointer;
-    }
-    .signin-btn:hover { background: var(--gradient); color:white; }
-
-    /* Layout grid - Reddit style */
-    .site {
-      display:grid;
-      grid-template-columns: 220px 1fr 300px;
-      gap: 18px;
-      padding: 22px;
-      max-width: 1300px;
-      margin: 18px auto;
-      align-items:start;
-    }
-
-    /* Left sidebar */
-    .left {
-      background: var(--container-bg);
-      border-radius: var(--radius-outer);
-      padding: 16px;
-      height: fit-content;
-      box-shadow: var(--shadow-strong);
-    }
-    .left .nav-item { padding:8px 6px; color: var(--muted); cursor:pointer; border-radius:8px; margin-bottom:6px; }
-    .left .nav-item:hover { color:var(--text); background: rgba(255,255,255,0.02); }
-
-    /* Feed (center) */
-    .center {
-      /* use center column as main feed */
-    }
-
-    .composer {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      padding: 12px;
-      margin-bottom: 14px;
-      display:flex;
-      gap:12px;
-      align-items:flex-start;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
-    }
-
-    .composer .avatar {
-      width:44px;height:44px;border-radius:8px;background:#2b2b2b;flex-shrink:0;
-    }
-
-    .composer .main {
-      flex:1;
-    }
-
-    .composer .main textarea {
-      width:100%;
-      background:#141414;
-      border:1px solid rgba(255,255,255,0.03);
-      color:var(--text);
-      padding:10px;
-      border-radius:10px;
-      min-height:68px;
-      resize:vertical;
-    }
-
-    .composer .controls {
-      display:flex;
-      gap:8px;
-      align-items:center;
-      margin-top:8px;
-    }
-
-    .btn {
-      background:#2b2b2b;
-      padding:8px 12px;
-      border-radius:10px;
-      border:none;
-      color:var(--text);
-      cursor:pointer;
-    }
-    .btn:hover { background:var(--gradient); color:white; }
-
-    .genre-select {
-      background:#141414;
-      padding:8px;
-      border-radius:10px;
-      border:1px solid rgba(255,255,255,0.03);
-      color:var(--text);
-    }
-
-    /* Post card */
-    .post {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      padding: 14px;
-      margin-bottom: 14px;
-      display:flex;
-      gap:12px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
-    }
-
-    .post .leftcore { width:60px; display:flex; flex-direction:column; align-items:center; gap:6px; color:var(--muted); }
-    .vote-btn { width:36px;height:36px;border-radius:8px;background:#2b2b2b;border:none;color:var(--text); cursor:pointer; }
-    .score { font-weight:700; margin:4px 0; }
-
-    .post .content { flex:1; }
-    .post .meta { color:var(--muted); font-size:13px; margin-bottom:8px; }
-    .post .text { white-space:pre-wrap; color:var(--text); }
-
-    /* Right sidebar */
-    .right {
-      background: var(--container-bg);
-      border-radius: var(--radius-outer);
-      padding: 16px;
-      height: fit-content;
-      box-shadow: var(--shadow-strong);
-    }
-    .right h4 { margin:0 0 10px 0; color:var(--muted); font-size:14px; }
-
-    /* Onboarding modal (fullscreen locked flow) */
-    .onboard-backdrop {
-      position:fixed;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:linear-gradient(0deg, rgba(0,0,0,0.6), rgba(0,0,0,0.6));
-      z-index:200;
-    }
-
-    .onboard {
-      width:920px;
-      max-width:calc(100% - 40px);
-      background:var(--container-bg);
-      border-radius:14px;
-      padding:20px;
-      box-shadow: 0 30px 80px rgba(0,0,0,0.8);
-      color:var(--text);
-      display:grid;
-      grid-template-columns: 1fr 360px;
-      gap:18px;
-      align-items:start;
-    }
-
-    .steps {
-      padding: 8px;
-    }
-    .step {
-      display:none;
-    }
-    .step.active { display:block; }
-
-    .form-row { margin-bottom:12px; }
-    input[type="text"], input[type="file"], select, textarea {
-      width:100%;
-      padding:10px;
-      border-radius:10px;
-      border:1px solid rgba(255,255,255,0.04);
-      background:#141414;
-      color:var(--text);
-    }
-
-    .genres-grid {
-      display:grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap:8px;
-      max-height:340px;
-      overflow:auto;
-      padding-right:6px;
-    }
-
-    .genre-chip {
-      padding:8px 10px;
-      border-radius:10px;
-      background:#262626;
-      color:var(--muted);
-      cursor:pointer;
-      border:1px solid transparent;
-      font-size:13px;
-    }
-    .genre-chip.selected {
-      background: linear-gradient(90deg, var(--accent-left), var(--accent-right));
-      color: #fff;
-      border: 1px solid rgba(0,0,0,0.2);
-    }
-
-    .tos {
-      background:#0f0f0f;
-      padding:12px;
-      border-radius:10px;
-      max-height:260px;
-      overflow:auto;
-      color:var(--muted);
-      border:1px solid rgba(255,255,255,0.03);
-      font-size:13px;
-      line-height:1.45;
-    }
-
-    .small-muted { color:var(--muted); font-size:13px; }
-
-    /* responsive */
-    @media (max-width: 1100px) {
-      .site { grid-template-columns: 60px 1fr 240px; padding: 12px; }
-      .left { width:60px; }
-      .left .nav-item { font-size:12px; writing-mode:vertical-rl; transform: rotate(180deg); }
-    }
-    @media (max-width: 800px) {
-      .site { grid-template-columns: 1fr; }
-      .left, .right { display:none; }
-      .search input { width: 80%; }
-    }
-
-  </style>
+/* FEED */
+.feed{
+  max-width:720px;
+  margin:30px auto;
+  padding:0 16px;
+}
+.post{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:18px;
+  margin-bottom:18px;
+}
+.meta{font-size:14px;color:var(--muted);margin-bottom:10px;}
+.content{margin-bottom:12px;}
+.media{
+  width:100%;
+  border-radius:12px;
+  margin-top:10px;
+}
+.vote{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+.vote button{
+  background:#2a2a2a;
+  border:none;
+  padding:6px 12px;
+  border-radius:8px;
+  color:white;
+  cursor:pointer;
+}
+.vote button:hover{
+  background:linear-gradient(90deg,var(--silver1),var(--silver2));
+  color:black;
+}
+</style>
 </head>
-
 <body>
 
-  <!-- NAVBAR -->
-  <div class="navbar">
-    <div class="logo">
-      <img src="logo-collapsed.png" alt="Yapaa">
-      <div style="font-weight:700; margin-left:8px;"> </div>
-    </div>
-
-    <div class="search">
-      <input id="searchInput" placeholder="Search yaps, users, genres..." />
-    </div>
-
-    <div class="nav-actions" id="navActions">
-      <button id="plusBtn" class="circle-btn">+</button>
-      <button id="loginBtn" class="signin-btn">Log in</button>
-      <button id="logoutBtn" class="signin-btn" style="display:none">Log out</button>
-      <div id="avatarWrap" style="display:none; margin-left:6px;">
-        <img id="smallAvatar" src="" alt="avatar" style="width:36px;height:36px;border-radius:8px;object-fit:cover;border:2px solid rgba(255,255,255,0.04)" />
-      </div>
-    </div>
+<div class="navbar">
+  <div class="logo">Kavno</div>
+  <div class="nav-right">
+    <button class="btn create-btn" onclick="location.href='create.html'">+</button>
+    <button id="loginBtn" class="btn">Login</button>
+    <button id="logoutBtn" class="btn" style="display:none;">Logout</button>
   </div>
+</div>
 
-  <!-- CREATE PANEL (anchored to +) -->
-  <div id="createPanel" style="position: absolute; right:22px; top:86px; width:360px; display:none; z-index:30;">
-    <div style="background:var(--card-bg); padding:14px; border-radius:12px; box-shadow: 0 12px 32px rgba(0,0,0,0.6);">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <strong>Create</strong>
-        <button id="closeCreate" class="circle-btn" style="width:34px;height:34px;border-radius:8px">✕</button>
+<div class="feed" id="feed"></div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+  getFirestore, collection, query, orderBy, onSnapshot,
+  doc, updateDoc, increment
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+/* FIREBASE */
+const firebaseConfig = {
+  apiKey: "AIzaSyBnT085eVcbqRiWG_ohyDFc6mShIqRcFOM",
+  authDomain: "kavno-8e9ea.firebaseapp.com",
+  projectId: "kavno-8e9ea",
+  storageBucket: "kavno-8e9ea.firebasestorage.app",
+  messagingSenderId: "978146900809",
+  appId: "1:978146900809:web:15265ae75beca386353898"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+/* AUTH */
+const loginBtn=document.getElementById("loginBtn");
+const logoutBtn=document.getElementById("logoutBtn");
+
+loginBtn.onclick=()=>signInWithPopup(auth,provider);
+logoutBtn.onclick=()=>signOut(auth);
+
+onAuthStateChanged(auth,user=>{
+  loginBtn.style.display=user?"none":"inline-block";
+  logoutBtn.style.display=user?"inline-block":"none";
+});
+
+/* FEED */
+const feed=document.getElementById("feed");
+const q=query(collection(db,"posts"),orderBy("createdAt","desc"));
+
+onSnapshot(q,snapshot=>{
+  feed.innerHTML="";
+  snapshot.forEach(docSnap=>{
+    const data=docSnap.data();
+    const id=docSnap.id;
+
+    const card=document.createElement("div");
+    card.className="post";
+
+    let mediaHTML="";
+    if(data.type==="klip"){
+      mediaHTML=`<video class="media" controls src="${data.mediaURL}"></video>`;
+    }
+    if(data.type==="post" && data.mediaURL){
+      mediaHTML=`<img class="media" src="${data.mediaURL}">`;
+    }
+
+    card.innerHTML=`
+      <div class="meta">@${data.username || "user"} • ${data.type}</div>
+      <div class="content">${data.text || ""}</div>
+      ${mediaHTML}
+      <div class="vote">
+        <button onclick="vote('${id}',1)">▲</button>
+        <span>${Math.max(data.score || 0,0)}</span>
+        <button onclick="vote('${id}',-1)">▼</button>
       </div>
-      <div style="margin-top:12px;">
-        <button id="openComposerPanel" class="btn" style="width:100%; margin-bottom:8px">Create a Yap</button>
-        <button class="btn" disabled style="width:100%;">Create a Cut (Coming Soon)</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MAIN SITE GRID -->
-  <div class="site">
-
-    <!-- LEFT -->
-    <aside class="left" id="leftCol">
-      <div style="font-weight:700; margin-bottom:8px;">Navigation</div>
-      <div class="nav-item" data-action="feed">Home</div>
-      <div class="nav-item" data-action="profile">Profile</div>
-      <div class="nav-item" data-action="myyaps">My Yaps</div>
-      <div class="nav-item" data-action="saved">Saved</div>
-      <div class="nav-item" data-action="settings">Settings</div>
-    </aside>
-
-    <!-- CENTER FEED -->
-    <main class="center">
-
-      <!-- Composer area (top of feed) -->
-      <div class="composer" id="topComposer">
-        <div class="avatar" id="composerAvatar"></div>
-        <div class="main">
-          <textarea id="composerText" placeholder="What's happening? (required genre)"></textarea>
-
-          <div class="controls" style="justify-content:space-between;">
-            <div style="display:flex; gap:8px; align-items:center;">
-              <select id="composerGenre" class="genre-select">
-                <!-- genre options populated by JS -->
-              </select>
-              <span class="small-muted" id="composerGenreNote">Select a genre</span>
-            </div>
-
-            <div style="display:flex; gap:8px;">
-              <button id="postBtn" class="btn">Post</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Feed list -->
-      <div id="feedList"></div>
-    </main>
-
-    <!-- RIGHT -->
-    <aside class="right">
-      <h4>Trending</h4>
-      <div id="trends" class="small-muted">No trends yet.</div>
-
-      <h4 style="margin-top:16px;">Suggested</h4>
-      <div id="suggested" class="small-muted">No suggestions yet.</div>
-    </aside>
-  </div>
-
-  <!-- ONBOARDING MODAL (locked fullscreen until completed) -->
-  <div id="onboardBackdrop" class="onboard-backdrop" style="display:none;">
-    <div class="onboard" role="dialog" aria-modal="true">
-      <div class="steps">
-        <div style="display:flex; align-items:center; gap:14px; margin-bottom:18px;">
-          <img src="logo-full.png" alt="Yapaa" style="height:48px" />
-          <div>
-            <div style="font-size:18px; font-weight:700;">Welcome to Yapaa</div>
-            <div class="small-muted">Create your account profile — 4 quick steps</div>
-          </div>
-        </div>
-
-        <!-- Step 1: Username -->
-        <div id="step1" class="step active">
-          <h3>Step 1 — Choose a username</h3>
-          <div class="form-row">
-            <input id="usernameInput" type="text" placeholder="Pick a username (3–20 chars)" maxlength="20" />
-            <div id="usernameHelp" class="small-muted">Usernames are unique. Stored lowercase for uniqueness.</div>
-            <div id="usernameStatus" class="small-muted" style="margin-top:8px;"></div>
-          </div>
-          <div style="display:flex; gap:8px; margin-top:8px;">
-            <button id="checkUsernameBtn" class="btn">Check & Continue</button>
-          </div>
-        </div>
-
-        <!-- Step 2: Profile Picture -->
-        <div id="step2" class="step">
-          <h3>Step 2 — Choose a profile picture</h3>
-          <div class="form-row">
-            <input id="photoInput" type="file" accept="image/*" />
-            <div class="small-muted" style="margin-top:8px;">Upload to Cloudinary (unsigned preset). Allowed: png, jpg, webp.</div>
-            <div id="photoPreview" style="margin-top:10px;"></div>
-          </div>
-          <div style="display:flex; gap:8px; margin-top:8px;">
-            <button id="toStep2Back" class="btn">Back</button>
-            <button id="toStep2Next" class="btn">Continue</button>
-          </div>
-        </div>
-
-        <!-- Step 3: Interests (1-3) -->
-        <div id="step3" class="step">
-          <h3>Step 3 — Pick your interests (1–3)</h3>
-          <div class="form-row genres-grid" id="interestsGrid"></div>
-          <div class="small-muted" style="margin-top:8px;">Choose at least 1 and at most 3 genres.</div>
-          <div style="display:flex; gap:8px; margin-top:8px;">
-            <button id="toStep3Back" class="btn">Back</button>
-            <button id="toStep3Next" class="btn">Continue</button>
-          </div>
-        </div>
-
-        <!-- Step 4: Terms -->
-        <div id="step4" class="step">
-          <h3>Step 4 — Terms of Service</h3>
-          <div class="tos" id="tosBox"></div>
-          <div class="small-muted" style="margin-top:8px;">Please read. Next button unlocks after 3 seconds.</div>
-          <div style="display:flex; gap:8px; margin-top:8px;">
-            <button id="toStep4Back" class="btn">Back</button>
-            <button id="finishOnboarding" class="btn" disabled>Finish</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- right column: preview -->
-      <div style="padding:12px; border-left:1px solid rgba(255,255,255,0.03);">
-        <div style="font-weight:700; margin-bottom:8px;">Preview</div>
-        <div style="display:flex; gap:12px; align-items:center; margin-bottom:12px;">
-          <div id="previewAvatar" style="width:64px;height:64px;border-radius:12px;background:#2b2b2b"></div>
-          <div>
-            <div id="previewUsername" style="font-weight:700;">username</div>
-            <div id="previewInterests" class="small-muted">interests</div>
-          </div>
-        </div>
-
-        <div style="margin-top:12px;">
-          <div style="font-weight:700; margin-bottom:6px;">Why we ask</div>
-          <div class="small-muted">Your username identifies you. Interests help personalize your feed. Profile picture helps people recognize you.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Firebase & App Logic -->
-  <script type="module">
-    // Firebase imports (using CDN)
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import {
-      getAuth,
-      GoogleAuthProvider,
-      signInWithPopup,
-      signOut,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-    import {
-      getFirestore,
-      doc,
-      setDoc,
-      getDoc,
-      collection,
-      addDoc,
-      serverTimestamp,
-      query,
-      orderBy,
-      onSnapshot
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-    // ---------- FIREBASE CONFIG (yours) ----------
-    const firebaseConfig = {
-      apiKey: "AIzaSyCAjWjAurT-TTbbo8P70Uo9IA5S6U1EAaM",
-      authDomain: "yapaa-5f2b8.firebaseapp.com",
-      projectId: "yapaa-5f2b8",
-      storageBucket: "yapaa-5f2b8.firebasestorage.app",
-      messagingSenderId: "508880150784",
-      appId: "1:508880150784:web:42353862a32d9010ac13e5"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const provider = new GoogleAuthProvider();
-
-    // ---------- CLOUDINARY (unsigned preset) ----------
-    // Provided: cloud name and unsigned preset name
-    const CLOUD_NAME = "dhsj2x1co";
-    const UPLOAD_PRESET = "profilePictures";
-    // The unsigned upload endpoint:
-    const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
-
-    // ---------- Elements ----------
-    const loginBtn = document.getElementById('loginBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const plusBtn = document.getElementById('plusBtn');
-    const createPanelEl = document.getElementById('createPanel');
-    const closeCreate = document.getElementById('closeCreate');
-    const openComposerPanel = document.getElementById('openComposerPanel');
-    const createPanel = document.getElementById('createPanel');
-
-    const onboardBackdrop = document.getElementById('onboardBackdrop');
-    const stepEls = {
-      step1: document.getElementById('step1'),
-      step2: document.getElementById('step2'),
-      step3: document.getElementById('step3'),
-      step4: document.getElementById('step4')
-    };
-
-    const usernameInput = document.getElementById('usernameInput');
-    const usernameStatus = document.getElementById('usernameStatus');
-    const checkUsernameBtn = document.getElementById('checkUsernameBtn');
-
-    const photoInput = document.getElementById('photoInput');
-    const photoPreview = document.getElementById('photoPreview');
-    const toStep2Back = document.getElementById('toStep2Back');
-    const toStep2Next = document.getElementById('toStep2Next');
-
-    const interestsGrid = document.getElementById('interestsGrid');
-    const toStep3Back = document.getElementById('toStep3Back');
-    const toStep3Next = document.getElementById('toStep3Next');
-
-    const tosBox = document.getElementById('tosBox');
-    const finishOnboarding = document.getElementById('finishOnboarding');
-    const toStep4Back = document.getElementById('toStep4Back');
-
-    const previewAvatar = document.getElementById('previewAvatar');
-    const previewUsername = document.getElementById('previewUsername');
-    const previewInterests = document.getElementById('previewInterests');
-
-    const composerAvatar = document.getElementById('composerAvatar');
-    const composerText = document.getElementById('composerText');
-    const composerGenre = document.getElementById('composerGenre');
-    const postBtn = document.getElementById('postBtn');
-
-    const feedList = document.getElementById('feedList');
-    const loginStatusAvatar = document.getElementById('smallAvatar');
-    const avatarWrap = document.getElementById('avatarWrap');
-    const navActions = document.getElementById('navActions');
-
-    // ---------- Genres (101 for Yaps, 100 for interests) ----------
-    // "Other" is first in yaps list (for lazy selection)
-    const fullGenres = [
-      "Other",
-      "Music","Gaming","Technology","Art","Movies","TV","Sports","News","Politics","Science","Food","Travel","Photography","DIY",
-      "Fashion","Fitness","Health","Books","Comics","Business","Finance","Cryptocurrency","History","Education","Programming",
-      "Startups","Jobs","Memes","Animals","Nature","Gardening","Parenting","Relationships","LGBTQ+","Productivity","Motivation",
-      "Design","Architecture","Cars","Motorcycles","Space","Astronomy","Philosophy","Psychology","Religion","Spirituality","Pets",
-      "Cooking","Baking","Coffee","Tea","Cocktails","Comedy","Theater","Poetry","Mystery","TrueCrime","Horror","Romance","Kpop",
-      "Indie","Classical","Jazz","HipHop","Rnb","Rock","Metal","Electronic","House","Techno","Blues","Country","Reggae","Folk",
-      "Anime","Manga","Kdrama","Webdev","Mobile","AI","ML","Robotics","Gadgets","Reviews","Unboxing","Podcasts","Streaming",
-      "PhotographyTips","Landscapes","Portraits","Editing","TravelTips","BudgetTravel","LuxuryTravel","Sustainability","Climate",
-      "PoliticsLocal","PoliticsGlobal","Economics","Law","Medicine","Wellness","MentalHealth","SelfImprovement","ArtHistory",
-      "Collecting","BoardGames","Tabletop","CardGames","Esports"
-    ];
-    // for interests (100 items) we will remove "Other" and take the next 100 (or fill if less)
-    const interestGenres = fullGenres.slice(1); // remove "Other" so interests are 100-ish
-
-    // Populate composer genre dropdown (yaps must pick one)
-    function populateComposerGenres() {
-      composerGenre.innerHTML = '';
-      for (let g of fullGenres) {
-        const opt = document.createElement('option');
-        opt.value = g;
-        opt.textContent = g;
-        composerGenre.appendChild(opt);
-      }
-    }
-    populateComposerGenres();
-
-    // Populate interests grid (user selects 1-3)
-    function populateInterests() {
-      interestsGrid.innerHTML = '';
-      for (let g of interestGenres) {
-        const btn = document.createElement('div');
-        btn.className = 'genre-chip';
-        btn.textContent = g;
-        btn.dataset.genre = g;
-        btn.addEventListener('click', () => toggleInterest(btn));
-        interestsGrid.appendChild(btn);
-      }
-    }
-    populateInterests();
-
-    // ---------- Onboarding state ----------
-    let currentUser = null;
-    let onboardingState = {
-      usernameDisplay: '',
-      usernameLower: '',
-      photoURL: '',       // will be Cloudinary secure_url
-      selectedInterests: []
-    };
-
-    // helper: show step
-    function showStep(stepKey) {
-      for (let k in stepEls) stepEls[k].classList.remove('active');
-      stepEls[stepKey].classList.add('active');
-    }
-
-    // -------- Username check & reservation logic ----------
-    async function isUsernameTaken(lower) {
-      const usernameDoc = await getDoc(doc(db, 'usernames', lower));
-      return usernameDoc.exists();
-    }
-
-    async function reserveUsernameAtomic(lower, uid) {
-      // Simple approach: attempt to create usernames/{lower} and users/{uid}
-      // Race conditions are possible in extreme edge cases; acceptable for beta.
-      try {
-        await setDoc(doc(db, 'usernames', lower), { uid });
-        return true;
-      } catch (e) {
-        console.error('reserve username error', e);
-        return false;
-      }
-    }
-
-    // ---------- Cloudinary unsigned upload ----------
-    async function uploadToCloudinary(file) {
-      if (!file) return null;
-      const fd = new FormData();
-      fd.append('file', file);
-      fd.append('upload_preset', UPLOAD_PRESET);
-      // Note: no API key for unsigned preset
-      try {
-        const res = await fetch(CLOUDINARY_URL, {
-          method: 'POST',
-          body: fd
-        });
-        const data = await res.json();
-        if (data && data.secure_url) return data.secure_url;
-        console.error('cloudinary failed', data);
-        return null;
-      } catch (err) {
-        console.error('cloudinary upload error', err);
-        return null;
-      }
-    }
-
-    // ---------- Onboarding UI handlers ----------
-    checkUsernameBtn.addEventListener('click', async () => {
-      const raw = usernameInput.value.trim();
-      if (raw.length < 3) {
-        usernameStatus.textContent = "Username must be at least 3 characters.";
-        return;
-      }
-      const lower = raw.toLowerCase();
-      usernameStatus.textContent = "Checking...";
-      const taken = await isUsernameTaken(lower);
-      if (taken) {
-        usernameStatus.textContent = "That username is already taken.";
-        return;
-      }
-      // reserve locally for now and go to next step
-      onboardingState.usernameDisplay = raw;
-      onboardingState.usernameLower = lower;
-      usernameStatus.textContent = "Looks good — continue to choose a profile picture.";
-      // advance visually
-      showStep('step2');
-    });
-
-    photoInput.addEventListener('change', async (e) => {
-      const f = e.target.files[0];
-      if (!f) return;
-      // preview locally
-      const url = URL.createObjectURL(f);
-      photoPreview.innerHTML = `<img src="${url}" style="width:120px;height:120px;border-radius:12px;object-fit:cover" />`;
-      // we defer uploading until finish or when user clicks continue
-    });
-
-    toStep2Back.addEventListener('click', () => showStep('step1'));
-    toStep2Next.addEventListener('click', () => showStep('step3'));
-
-    // interests selection logic
-    function toggleInterest(el) {
-      const g = el.dataset.genre;
-      const sel = onboardingState.selectedInterests;
-      if (el.classList.contains('selected')) {
-        el.classList.remove('selected');
-        const idx = sel.indexOf(g);
-        if (idx !== -1) sel.splice(idx, 1);
-      } else {
-        if (sel.length >= 3) return;
-        el.classList.add('selected');
-        sel.push(g);
-      }
-      previewInterests.textContent = onboardingState.selectedInterests.join(', ') || 'None';
-    }
-
-    toStep3Back.addEventListener('click', () => showStep('step2'));
-    toStep3Next.addEventListener('click', () => {
-      if (onboardingState.selectedInterests.length < 1) {
-        alert('Please choose at least 1 interest (up to 3).');
-        return;
-      }
-      showStep('step4');
-      // unlock finish button after 3 seconds
-      finishOnboarding.disabled = true;
-      setTimeout(() => { finishOnboarding.disabled = false; }, 3000);
-    });
-
-    toStep4Back.addEventListener('click', () => showStep('step3'));
-
-    // Terms of Service content (readable but concise)
-    const TERMS_TEXT = `
-Welcome to Yapaa — Terms of Service (Short)
-
-1) You are responsible for what you post. Do not post illegal content.
-2) Respect other users. Harassment, threats, and hate are not allowed.
-3) We may remove content that breaks these rules.
-4) We store public content and basic profile info (username, interests, avatar).
-5) We do not sell your personal email. We may use aggregated analytics.
-6) No minors under 13 — you confirm you meet age requirements.
-
-This is a simplified ToS for the beta. By continuing, you accept these terms.
-`.trim();
-
-    tosBox.textContent = TERMS_TEXT;
-
-    // finish onboarding
-    finishOnboarding.addEventListener('click', async () => {
-      // validations already done: usernameLower, interests present
-      if (!onboardingState.usernameLower) { alert('username missing'); return; }
-      if (onboardingState.selectedInterests.length < 1) { alert('select interests'); return; }
-
-      // show saving state
-      finishOnboarding.textContent = 'Saving...';
-      finishOnboarding.disabled = true;
-
-      // upload photo if selected
-      let photoURL = '';
-      const file = photoInput.files[0];
-      if (file) {
-        const up = await uploadToCloudinary(file);
-        if (up) photoURL = up;
-      }
-
-      onboardingState.photoURL = photoURL || '';
-
-      // reserve username doc and create user doc
-      try {
-        // create usernames/{lower}
-        await setDoc(doc(db, 'usernames', onboardingState.usernameLower), { uid: currentUser.uid });
-
-        // create users/{uid}
-        await setDoc(doc(db, 'users', currentUser.uid), {
-          uid: currentUser.uid,
-          email: currentUser.email || '',
-          usernameDisplay: onboardingState.usernameDisplay,
-          usernameLower: onboardingState.usernameLower,
-          photoURL: onboardingState.photoURL,
-          interests: onboardingState.selectedInterests,
-          createdAt: serverTimestamp()
-        });
-
-        // done: hide modal, refresh UI
-        onboardBackdrop.style.display = 'none';
-        loadUserProfileUI();
-        finishOnboarding.textContent = 'Done';
-      } catch (err) {
-        console.error('onboarding save error', err);
-        alert('Failed to finish onboarding. Try again.');
-        finishOnboarding.disabled = false;
-        finishOnboarding.textContent = 'Finish';
-      }
-    });
-
-    // preview updates
-    function refreshPreview() {
-      previewUsername.textContent = onboardingState.usernameDisplay || 'username';
-      previewInterests.textContent = onboardingState.selectedInterests.join(', ') || 'None yet';
-      if (onboardingState.photoURL) {
-        previewAvatar.innerHTML = `<img src="${onboardingState.photoURL}" style="width:64px;height:64px;border-radius:12px;object-fit:cover" />`;
-        composerAvatar.style.backgroundImage = `url(${onboardingState.photoURL})`;
-        composerAvatar.style.backgroundSize = 'cover';
-      }
-    }
-
-    // watch inputs to update preview
-    usernameInput.addEventListener('input', () => {
-      onboardingState.usernameDisplay = usernameInput.value.trim();
-      refreshPreview();
-    });
-
-    // when a file is selected for step2, show preview and update state preview
-    photoInput.addEventListener('change', async () => {
-      const f = photoInput.files[0];
-      if (!f) return;
-      const url = URL.createObjectURL(f);
-      previewAvatar.innerHTML = `<img src="${url}" style="width:64px;height:64px;border-radius:12px;object-fit:cover" />`;
-      // onboardingState.photoURL remains empty until upload on finish
-    });
-
-    // ---------- Auth & onboarding flow ----------
-    loginBtn.addEventListener('click', async () => {
-      try {
-        await signInWithPopup(auth, provider);
-      } catch (e) {
-        console.error('login error', e);
-        alert('Login canceled or failed.');
-      }
-    });
-
-    logoutBtn.addEventListener('click', async () => {
-      await signOut(auth);
-    });
-
-    onAuthStateChanged(auth, async (user) => {
-      currentUser = user;
-      if (!user) {
-        // logged out
-        loginBtn.style.display = '';
-        logoutBtn.style.display = 'none';
-        avatarWrap.style.display = 'none';
-        // show login-only UI
-        return;
-      }
-
-      // logged in
-      loginBtn.style.display = 'none';
-      logoutBtn.style.display = '';
-      avatarWrap.style.display = '';
-      loginStatusAvatar.src = user.photoURL || 'logo-collapsed.png';
-
-      // check if users/{uid} exists
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      if (!userDoc.exists()) {
-        // start onboarding
-        onboardingState = { usernameDisplay:'', usernameLower:'', photoURL:'', selectedInterests: [] };
-        usernameInput.value = '';
-        usernameStatus.textContent = '';
-        photoPreview.innerHTML = '';
-        interestsGrid.querySelectorAll('.genre-chip').forEach(el => el.classList.remove('selected'));
-        previewAvatar.innerHTML = '';
-        previewUsername.textContent = 'username';
-        previewInterests.textContent = 'None yet';
-        showStep('step1');
-        onboardBackdrop.style.display = 'flex';
-      } else {
-        // user exists: load their profile into UI
-        const data = userDoc.data();
-        onboardingState.usernameDisplay = data.usernameDisplay || '';
-        onboardingState.photoURL = data.photoURL || '';
-        onboardingState.selectedInterests = data.interests || [];
-        // update composer avatar and small avatar
-        if (onboardingState.photoURL) {
-          composerAvatar.style.backgroundImage = `url(${onboardingState.photoURL})`;
-          composerAvatar.style.backgroundSize = 'cover';
-          loginStatusAvatar.src = onboardingState.photoURL;
-        } else {
-          loginStatusAvatar.src = user.photoURL || 'logo-collapsed.png';
-        }
-      }
-
-      loadUserProfileUI();
-    });
-
-    function loadUserProfileUI(){
-      // update composer avatar & small avatar
-      if (onboardingState.photoURL) {
-        composerAvatar.style.backgroundImage = `url(${onboardingState.photoURL})`;
-        composerAvatar.style.backgroundSize = 'cover';
-        loginStatusAvatar.src = onboardingState.photoURL;
-        avatarWrap.style.display = '';
-      } else if (currentUser && currentUser.photoURL) {
-        loginStatusAvatar.src = currentUser.photoURL;
-        avatarWrap.style.display = '';
-      } else {
-        avatarWrap.style.display = 'none';
-      }
-    }
-
-    // ---------- Composer logic (post a yap) ----------
-    postBtn.addEventListener('click', async () => {
-      if (!currentUser) return alert('Please log in to post.');
-      // ensure user doc exists and has usernameLower
-      const uDoc = await getDoc(doc(db, 'users', currentUser.uid));
-      if (!uDoc.exists()) return alert('Complete onboarding first.');
-      const udata = uDoc.data();
-      const content = composerText.value.trim();
-      if (!content) return alert('Please write something.');
-      const genre = composerGenre.value;
-      if (!genre) return alert('Select a genre.');
-
-      postBtn.disabled = true;
-      postBtn.textContent = 'Posting...';
-
-      try {
-        await addDoc(collection(db, 'yaps'), {
-          uid: currentUser.uid,
-          usernameDisplay: udata.usernameDisplay,
-          usernameLower: udata.usernameLower,
-          photoURL: udata.photoURL || '',
-          content,
-          genre,
-          likes: 0,
-          dislikes: 0,
-          createdAt: serverTimestamp()
-        });
-        composerText.value = '';
-      } catch (err) {
-        console.error('post error', err);
-        alert('Failed to post.');
-      } finally {
-        postBtn.disabled = false;
-        postBtn.textContent = 'Post';
-      }
-    });
-
-    // ---------- Load feed (real-time) ----------
-    function startFeedListener() {
-      const qref = query(collection(db, 'yaps'), orderBy('createdAt', 'desc'));
-      onSnapshot(qref, (snap) => {
-        feedList.innerHTML = '';
-        snap.forEach(d => {
-          const data = d.data();
-          const postEl = document.createElement('div');
-          postEl.className = 'post';
-          postEl.innerHTML = `
-            <div class="leftcore">
-              <button class="vote-btn upvote" data-id="${d.id}">▲</button>
-              <div class="score" data-id="${d.id}">${Math.max((data.likes||0) - (data.dislikes||0),0)}</div>
-              <button class="vote-btn downvote" data-id="${d.id}">▼</button>
-            </div>
-            <div class="content">
-              <div class="meta"><strong>${escapeHtml(data.usernameDisplay||'anon')}</strong> • <span class="small-muted">${escapeHtml(data.genre||'')}</span> • <span class="small-muted">${data.createdAt ? (new Date(data.createdAt.toDate()).toLocaleString()) : ''}</span></div>
-              <div class="text">${escapeHtml(data.content)}</div>
-            </div>
-          `;
-          feedList.appendChild(postEl);
-        });
-        wireUpVotes(); // attach event handlers
-      });
-    }
-    startFeedListener();
-
-    // ---------- Voting handlers (basic optimistic UI + Firestore writes) ----------
-    function wireUpVotes() {
-      document.querySelectorAll('.vote-btn.upvote').forEach(btn => {
-        btn.onclick = async (e) => {
-          const postId = btn.dataset.id;
-          await toggleVote(postId, 1);
-        };
-      });
-      document.querySelectorAll('.vote-btn.downvote').forEach(btn => {
-        btn.onclick = async (e) => {
-          const postId = btn.dataset.id;
-          await toggleVote(postId, -1);
-        };
-      });
-    }
-
-    // Vote storage model:
-    // yaps/{yapId}/votes/{uid} { vote: 1|-1 }
-    // and update likes/dislikes counters on the parent doc (simple approach for beta)
-    import { getDoc as getDoc2, setDoc as setDoc2, doc as doc2, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-    async function toggleVote(postId, voteValue) {
-      if (!currentUser) return alert('Log in to vote.');
-      const voteRef = doc(db, 'yaps', postId, 'votes', currentUser.uid);
-      try {
-        const existing = await getDoc2(voteRef);
-        const yapRef = doc(db, 'yaps', postId);
-        if (!existing.exists()) {
-          // create vote doc
-          await setDoc2(voteRef, { vote: voteValue });
-          if (voteValue === 1) {
-            await updateDoc(yapRef, { likes: ( (await getDoc(yapRef)).data()?.likes || 0 ) + 1 });
-          } else {
-            await updateDoc(yapRef, { dislikes: ( (await getDoc(yapRef)).data()?.dislikes || 0 ) + 1 });
-          }
-        } else {
-          const current = existing.data().vote;
-          if (current === voteValue) {
-            // remove vote
-            await deleteDoc(voteRef);
-            if (voteValue === 1) {
-              await updateDoc(yapRef, { likes: ( (await getDoc(yapRef)).data()?.likes || 1 ) - 1 });
-            } else {
-              await updateDoc(yapRef, { dislikes: ( (await getDoc(yapRef)).data()?.dislikes || 1 ) - 1 });
-            }
-          } else {
-            // flip vote: set new vote and update counts
-            await setDoc2(voteRef, { vote: voteValue });
-            if (voteValue === 1) {
-              await updateDoc(yapRef, {
-                likes: ( (await getDoc(yapRef)).data()?.likes || 0 ) + 1,
-                dislikes: ( (await getDoc(yapRef)).data()?.dislikes || 0 ) - 1
-              });
-            } else {
-              await updateDoc(yapRef, {
-                dislikes: ( (await getDoc(yapRef)).data()?.dislikes || 0 ) + 1,
-                likes: ( (await getDoc(yapRef)).data()?.likes || 0 ) - 1
-              });
-            }
-          }
-        }
-      } catch (err) {
-        console.error('vote error', err);
-      }
-    }
-
-    // ---------- UI interactions: plus panel and composer panel ----------
-    plusBtn.addEventListener('click', () => {
-      const el = document.getElementById('createPanel');
-      if (el.style.display === 'block') {
-        el.style.display = 'none';
-        plusBtn.classList.remove('open');
-      } else {
-        el.style.display = 'block';
-        plusBtn.classList.add('open');
-      }
-    });
-    closeCreate.addEventListener('click', () => {
-      document.getElementById('createPanel').style.display = 'none';
-      plusBtn.classList.remove('open');
-    });
-    openComposerPanel.addEventListener('click', () => {
-      // focus composer textarea and close create panel
-      composerText.focus();
-      document.getElementById('createPanel').style.display = 'none';
-      plusBtn.classList.remove('open');
-    });
-
-    // ---------- Utilities ----------
-    function escapeHtml(text) {
-      if (!text) return '';
-      return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
-
-    // ---------- Init: populate the composer avatar placeholder and small avatar fallback ----------
-    composerAvatar.style.background = '#2b2b2b';
-
-    // Periodically refresh preview (when onboardingState changes)
-    setInterval(refreshPreview, 800);
-
-    // onboardBackdrop close is controlled only by completing onboarding
-    // ensure the element exists but is hidden by default, shown on login if needed
-
-    // Quick guard: if user is already logged in when the page loads, auth listener will run.
-  </script>
+    `;
+    feed.appendChild(card);
+  });
+});
+
+window.vote=async(id,val)=>{
+  const ref=doc(db,"posts",id);
+  await updateDoc(ref,{ score:increment(val) });
+};
+
+</script>
 </body>
 </html>
