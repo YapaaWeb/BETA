@@ -1,189 +1,207 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KAVNO</title>
+  <title>Kavno</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy, updateDoc, doc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-<style>
-:root{
-  --bg:#070707;
-  --card:#151515;
-  --text:#ffffff;
-  --muted:#9a9a9a;
-  --silver1:#dcdcdc;
-  --silver2:#8f8f8f;
-  --radius:14px;
-}
-*{box-sizing:border-box}
-body{margin:0;font-family:Inter,system-ui;background:var(--bg);color:var(--text);}
+    const firebaseConfig = {
+      apiKey: "AIzaSyBnT085eVcbqRiWG_ohyDFc6mShIqRcFOM",
+      authDomain: "kavno-8e9ea.firebaseapp.com",
+      projectId: "kavno-8e9ea",
+      storageBucket: "kavno-8e9ea.firebasestorage.app",
+      messagingSenderId: "978146900809",
+      appId: "1:978146900809:web:15265ae75beca386353898"
+    };
 
-/* NAVBAR */
-.navbar{
-  height:70px;
-  background:#111;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 20px;
-  position:sticky;
-  top:0;
-  z-index:100;
-}
-.logo{font-weight:700;font-size:20px;}
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
 
-.nav-right{display:flex;gap:12px;align-items:center;}
+    window.login = () => signInWithPopup(auth, provider);
+    window.logout = () => signOut(auth);
 
-.btn{
-  background:#2a2a2a;
-  border:none;
-  padding:8px 14px;
-  border-radius:10px;
-  color:white;
-  cursor:pointer;
-  transition:.3s;
-}
-.btn:hover{
-  background:linear-gradient(90deg,var(--silver1),var(--silver2));
-  color:black;
-}
+    onAuthStateChanged(auth, user => {
+      const right = document.getElementById("rightNav");
+      if (user) {
+        right.innerHTML = `
+          <a href="create.html" class="createBtn">+</a>
+          <img src="${user.photoURL}" class="avatar">
+          <button onclick="logout()">Logout</button>
+        `;
+      } else {
+        right.innerHTML = `<button onclick="login()">Log In</button>`;
+      }
+    });
 
-.create-btn{
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  font-size:22px;
-  padding:0;
-}
+    async function loadPosts() {
+      const feed = document.getElementById("feed");
+      feed.innerHTML = "";
+      const q = query(collection(db, "posts"), orderBy("created", "desc"));
+      const snapshot = await getDocs(q);
 
-/* FEED */
-.feed{
-  max-width:720px;
-  margin:30px auto;
-  padding:0 16px;
-}
-.post{
-  background:var(--card);
-  border-radius:var(--radius);
-  padding:18px;
-  margin-bottom:18px;
-}
-.meta{font-size:14px;color:var(--muted);margin-bottom:10px;}
-.content{margin-bottom:12px;}
-.media{
-  width:100%;
-  border-radius:12px;
-  margin-top:10px;
-}
-.vote{
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
-.vote button{
-  background:#2a2a2a;
-  border:none;
-  padding:6px 12px;
-  border-radius:8px;
-  color:white;
-  cursor:pointer;
-}
-.vote button:hover{
-  background:linear-gradient(90deg,var(--silver1),var(--silver2));
-  color:black;
-}
-</style>
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const postId = docSnap.id;
+
+        const post = document.createElement("div");
+        post.className = "postCard";
+
+        post.innerHTML = `
+          <div class="voteColumn">
+            <button onclick="vote('${postId}',1)">▲</button>
+            <div id="score-${postId}">${data.score || 0}</div>
+            <button onclick="vote('${postId}',-1)">▼</button>
+          </div>
+          <div class="postContent">
+            <div class="genreTag">${data.genre || "Other"}</div>
+            <h3>${data.title}</h3>
+            ${data.media ? `<img src="${data.media}" class="postImage">` : ""}
+            <p>${data.body || ""}</p>
+          </div>
+        `;
+        feed.appendChild(post);
+      });
+    }
+
+    window.vote = async (id, value) => {
+      const postRef = doc(db, "posts", id);
+      await updateDoc(postRef, { score: increment(value) });
+      loadPosts();
+    };
+
+    window.addEventListener("DOMContentLoaded", loadPosts);
+  </script>
+
+  <style>
+    body {
+      margin: 0;
+      background: #030303;
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background: #111;
+      border-bottom: 1px solid #222;
+    }
+
+    .logo {
+      font-weight: bold;
+      font-size: 20px;
+      color: #ff914d;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 240px 1fr 300px;
+      gap: 20px;
+      max-width: 1200px;
+      margin: 20px auto;
+    }
+
+    .sidebar, .rightbar {
+      background: #111;
+      padding: 15px;
+      border-radius: 8px;
+    }
+
+    #feed {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .postCard {
+      display: flex;
+      background: #111;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .voteColumn {
+      background: #0d0d0d;
+      width: 50px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 0;
+      gap: 5px;
+    }
+
+    .voteColumn button {
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+
+    .postContent {
+      padding: 15px;
+      flex: 1;
+    }
+
+    .postImage {
+      width: 100%;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+
+    .genreTag {
+      font-size: 12px;
+      background: linear-gradient(to right, #ff914d, #ff6100);
+      padding: 3px 8px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 6px;
+    }
+
+    .createBtn {
+      background: linear-gradient(to right, #ff914d, #ff6100);
+      padding: 8px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      color: white;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    .avatar {
+      width: 32px;
+      border-radius: 50%;
+      vertical-align: middle;
+      margin-right: 10px;
+    }
+  </style>
 </head>
+
 <body>
-
-<div class="navbar">
-  <div class="logo">Kavno</div>
-  <div class="nav-right">
-    <button class="btn create-btn" onclick="location.href='create.html'">+</button>
-    <button id="loginBtn" class="btn">Login</button>
-    <button id="logoutBtn" class="btn" style="display:none;">Logout</button>
+  <div class="navbar">
+    <div class="logo">KAVNO</div>
+    <div id="rightNav"></div>
   </div>
-</div>
 
-<div class="feed" id="feed"></div>
+  <div class="layout">
+    <div class="sidebar">
+      <div>Home</div>
+      <div>Popular</div>
+      <div>Explore</div>
+    </div>
 
-<script type="module">
+    <div id="feed"></div>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import {
-  getFirestore, collection, query, orderBy, onSnapshot,
-  doc, updateDoc, increment
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-/* FIREBASE */
-const firebaseConfig = {
-  apiKey: "AIzaSyBnT085eVcbqRiWG_ohyDFc6mShIqRcFOM",
-  authDomain: "kavno-8e9ea.firebaseapp.com",
-  projectId: "kavno-8e9ea",
-  storageBucket: "kavno-8e9ea.firebasestorage.app",
-  messagingSenderId: "978146900809",
-  appId: "1:978146900809:web:15265ae75beca386353898"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const provider = new GoogleAuthProvider();
-
-/* AUTH */
-const loginBtn=document.getElementById("loginBtn");
-const logoutBtn=document.getElementById("logoutBtn");
-
-loginBtn.onclick=()=>signInWithPopup(auth,provider);
-logoutBtn.onclick=()=>signOut(auth);
-
-onAuthStateChanged(auth,user=>{
-  loginBtn.style.display=user?"none":"inline-block";
-  logoutBtn.style.display=user?"inline-block":"none";
-});
-
-/* FEED */
-const feed=document.getElementById("feed");
-const q=query(collection(db,"posts"),orderBy("createdAt","desc"));
-
-onSnapshot(q,snapshot=>{
-  feed.innerHTML="";
-  snapshot.forEach(docSnap=>{
-    const data=docSnap.data();
-    const id=docSnap.id;
-
-    const card=document.createElement("div");
-    card.className="post";
-
-    let mediaHTML="";
-    if(data.type==="klip"){
-      mediaHTML=`<video class="media" controls src="${data.mediaURL}"></video>`;
-    }
-    if(data.type==="post" && data.mediaURL){
-      mediaHTML=`<img class="media" src="${data.mediaURL}">`;
-    }
-
-    card.innerHTML=`
-      <div class="meta">@${data.username || "user"} • ${data.type}</div>
-      <div class="content">${data.text || ""}</div>
-      ${mediaHTML}
-      <div class="vote">
-        <button onclick="vote('${id}',1)">▲</button>
-        <span>${Math.max(data.score || 0,0)}</span>
-        <button onclick="vote('${id}',-1)">▼</button>
-      </div>
-    `;
-    feed.appendChild(card);
-  });
-});
-
-window.vote=async(id,val)=>{
-  const ref=doc(db,"posts",id);
-  await updateDoc(ref,{ score:increment(val) });
-};
-
-</script>
+    <div class="rightbar">
+      <h4>About Kavno</h4>
+      <p>Post freely. Vote fairly.</p>
+    </div>
+  </div>
 </body>
 </html>
